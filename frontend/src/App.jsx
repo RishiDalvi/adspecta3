@@ -85,104 +85,88 @@ export default function App() {
     // -----------------------------
     return ( <
         div style = {
-            { padding: "20px", fontFamily: "Arial" }
-        } >
+            { padding: "20px", fontFamily: "Arial" } } >
         <
         h1 > AdSpecta– Smart AdSpace Recommendation < /h1>
 
         { /* FILTERS */ } <
         div style = {
-            { marginBottom: 20 }
-        } >
+            { marginBottom: 20 } } >
 
         <
         label style = {
-            { marginRight: 10 }
-        } > Budget(₹): < /label> <
+            { marginRight: 10 } } > Budget(₹): < /label> <
         input type = "number"
         value = { budget }
         onChange = {
-            (e) => setBudget(e.target.value)
-        }
+            (e) => setBudget(e.target.value) }
         style = {
-            { marginRight: 20 }
-        }
+            { marginRight: 20 } }
         />
 
         <
         label style = {
-            { marginRight: 10 }
-        } > Audience Type: < /label> <
+            { marginRight: 10 } } > Audience Type: < /label> <
         select value = { audienceType }
         onChange = {
-            (e) => setAudienceType(e.target.value)
-        }
+            (e) => setAudienceType(e.target.value) }
         style = {
-            { marginRight: 20 }
-        } >
+            { marginRight: 20 } } >
         <
         option value = "general" > General < /option> <
         option value = "students" > Students < /option> <
         option value = "it_workers" > IT Workers < /option> <
         option value = "shoppers" > Shoppers < /option> <
         option value = "residents" > Residents < /option> <
-        option value = "tourists" > Tourists < /option> < /
-        select >
+        option value = "tourists" > Tourists < /option> <
+        /select>
 
         <
         br / > < br / >
 
         <
         label style = {
-            { marginRight: 10 }
-        } > Age Min: < /label> <
+            { marginRight: 10 } } > Age Min: < /label> <
         input type = "number"
         value = { ageMin }
         onChange = {
-            (e) => setAgeMin(e.target.value)
-        }
+            (e) => setAgeMin(e.target.value) }
         style = {
-            { width: 60, marginRight: 20 }
-        }
+            { width: 60, marginRight: 20 } }
         />
 
         <
         label style = {
-            { marginRight: 10 }
-        } > Age Max: < /label> <
+            { marginRight: 10 } } > Age Max: < /label> <
         input type = "number"
         value = { ageMax }
         onChange = {
-            (e) => setAgeMax(e.target.value)
-        }
+            (e) => setAgeMax(e.target.value) }
         style = {
-            { width: 60, marginRight: 20 }
-        }
+            { width: 60, marginRight: 20 } }
         />
 
         <
-        button onClick = { getRecommendations } > Get Recommendations < /button> < /
-        div >
+        button onClick = { getRecommendations } > Get Recommendations < /button> <
+        /div>
 
         { /* STATUS */ } {
             statusMsg && ( <
                 div style = {
-                    { marginBottom: 10 }
-                } >
+                    { marginBottom: 10 } } >
                 <
-                strong > Status: < /strong> {statusMsg} < /
-                div >
+                strong > Status: < /strong> {statusMsg} <
+                /div>
             )
         }
 
         {
             lastError && ( <
                 div style = {
-                    { color: "red", marginBottom: 10 }
-                } >
+                    { color: "red", marginBottom: 10 } } >
                 <
-                strong > Error: < /strong> {lastError} < /
-                div >
+                strong > Error: < /strong> {lastError} <
+                /div>
             )
         }
 
@@ -219,7 +203,7 @@ export default function App() {
                     /div>
                 ))
             } <
-            /div> < /
-            div >
+            /div> <
+            /div>
         );
     }
