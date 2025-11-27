@@ -1,90 +1,104 @@
 import React, { useState, useEffect } from "react";
 
-// ✅ Read backend URL from Vercel environment variable
-// If missing, fallback to local server for development
+// -----------------------------
+// CONFIG: BACKEND API URL
+// -----------------------------
+// If Vercel provides an environment variable, use it.
+// If not, fallback to your deployed Railway backend.
 const API =
-    import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+    import.meta.env.VITE_API_URL ||
+    "https://adspecta3-production.up.railway.app";
 
 export default function App() {
     const [budget, setBudget] = useState(60000);
 
-    // New audience filters
-    const [audience, setAudience] = useState("general");
+    // Audience inputs
+    const [audienceType, setAudienceType] = useState("general");
     const [ageMin, setAgeMin] = useState(18);
     const [ageMax, setAgeMax] = useState(60);
 
     const [results, setResults] = useState([]);
     const [statusMsg, setStatusMsg] = useState("");
-    const [lastError, setLastError] = useState(null);
+    const [lastError, setLastError] = useState("");
 
     useEffect(() => {
-        console.log("[App] Frontend loaded");
-        console.log("Backend API:", API);
-        setStatusMsg(`Frontend loaded. Using API: ${API}`);
+        console.log("🔵 FRONTEND LOADED");
+        console.log("🔗 Backend URL:", API);
+
+        setStatusMsg("Frontend loaded. Ready to request backend.");
     }, []);
 
+    // -----------------------------
+    // MAIN FUNCTION: API CALL
+    // -----------------------------
     async function getRecommendations() {
         setStatusMsg("Sending request...");
-        setLastError(null);
+        setLastError("");
+
+        const payload = {
+            lat: 18.5204,
+            lng: 73.8567,
+            budget: Number(budget),
+            audience_age_min: Number(ageMin),
+            audience_age_max: Number(ageMax),
+            audience_type: audienceType
+        };
+
+        console.log("📤 Sending Payload:", payload);
 
         try {
-            const payload = {
-                lat: 18.5204,
-                lng: 73.8567,
-                budget: Number(budget),
-                audience_age_min: Number(ageMin),
-                audience_age_max: Number(ageMax),
-                audience_type: audience
-            };
-
-            console.log("[Payload]", payload);
-
             const res = await fetch(`${API}/predict`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
+            console.log("📥 Response status:", res.status);
+
+            // If backend returns non-JSON error
             let data;
             try {
                 data = await res.json();
-            } catch (e) {
-                const text = await res.text();
-                throw new Error(`JSON parse failed. Body: ${text}`);
+            } catch (err) {
+                const rawText = await res.text();
+                throw new Error("JSON parse failed: " + rawText);
             }
 
-            console.log("[Response JSON]", data);
+            console.log("📥 Parsed JSON:", data);
 
-            if (!Array.isArray(data) || data.length === 0) {
-                setStatusMsg("No results found.");
+            if (Array.isArray(data) && data.length > 0) {
+                setResults(data);
+                setStatusMsg(`Found ${data.length} results`);
             } else {
-                setStatusMsg(`Found ${data.length} matching adspaces.`);
+                setResults([]);
+                setStatusMsg("No results returned");
             }
-
-            setResults(data);
-
         } catch (err) {
-            console.error("[ERROR]", err);
-            setLastError(String(err));
-            setStatusMsg("Request failed. See console.");
-            setResults([]);
+            console.error("❌ API ERROR:", err);
+            setLastError(err.message);
+            setStatusMsg("Request failed");
         }
     }
 
+    // -----------------------------
+    // RENDER UI
+    // -----------------------------
     return ( <
         div style = {
-            { padding: "20px", fontFamily: "Arial, sans-serif" }
+            { padding: "20px", fontFamily: "Arial" }
         } >
         <
-        h1 > AdSpecta: Targeted Adspace Recommendations < /h1>
+        h1 > AdSpecta– Smart AdSpace Recommendation < /h1>
 
-        { /* INPUTS */ } <
+        { /* FILTERS */ } <
         div style = {
             { marginBottom: 20 }
         } >
 
         <
-        label > Budget(₹): < /label> <
+        label style = {
+            { marginRight: 10 }
+        } > Budget(₹): < /label> <
         input type = "number"
         value = { budget }
         onChange = {
@@ -96,10 +110,12 @@ export default function App() {
         />
 
         <
-        label > Audience Type: < /label> <
-        select value = { audience }
+        label style = {
+            { marginRight: 10 }
+        } > Audience Type: < /label> <
+        select value = { audienceType }
         onChange = {
-            (e) => setAudience(e.target.value)
+            (e) => setAudienceType(e.target.value)
         }
         style = {
             { marginRight: 20 }
@@ -117,7 +133,9 @@ export default function App() {
         br / > < br / >
 
         <
-        label > Age Min: < /label> <
+        label style = {
+            { marginRight: 10 }
+        } > Age Min: < /label> <
         input type = "number"
         value = { ageMin }
         onChange = {
@@ -129,7 +147,9 @@ export default function App() {
         />
 
         <
-        label > Age Max: < /label> <
+        label style = {
+            { marginRight: 10 }
+        } > Age Max: < /label> <
         input type = "number"
         value = { ageMax }
         onChange = {
@@ -144,18 +164,21 @@ export default function App() {
         button onClick = { getRecommendations } > Get Recommendations < /button> < /
         div >
 
-        { /* STATUS */ } <
-        div style = {
-            { marginBottom: 12 }
-        } >
-        <
-        strong > Status: < /strong> {statusMsg} < /
-        div >
+        { /* STATUS */ } {
+            statusMsg && ( <
+                div style = {
+                    { marginBottom: 10 }
+                } >
+                <
+                strong > Status: < /strong> {statusMsg} < /
+                div >
+            )
+        }
 
         {
             lastError && ( <
                 div style = {
-                    { color: "red", marginBottom: 12 }
+                    { color: "red", marginBottom: 10 }
                 } >
                 <
                 strong > Error: < /strong> {lastError} < /
@@ -168,14 +191,14 @@ export default function App() {
             results.length === 0 && < div > No results to show. < /div>}
 
             {
-                results.map((r, index) => ( <
-                    div key = { r.id || index }
+                results.map((r) => ( <
+                    div key = { r.id }
                     style = {
                         {
                             border: "1px solid #ccc",
-                            padding: "12px",
-                            marginBottom: "12px",
-                            borderRadius: "6px"
+                            padding: 12,
+                            borderRadius: 6,
+                            marginBottom: 12
                         }
                     } >
                     <
@@ -188,18 +211,11 @@ export default function App() {
 
                     <
                     p > < strong > Predicted Impressions: < /strong> {r.predicted_impressions}</p >
-
                     <
-                    p >
+                    p > < strong > Audience Match: < /strong> {r.audience_match?.toFixed(2)}</p >
                     <
-                    strong > Audience Match Score: < /strong>{" "} { r.audience_match ? .toFixed(2) } < /
-                    p >
-
+                    p > < strong > Final Score: < /strong> {r.final_score?.toFixed(2)}</p >
                     <
-                    p >
-                    <
-                    strong > Final Score: < /strong>{" "} { r.final_score ? .toFixed(2) } < /
-                    p > <
                     /div>
                 ))
             } <
